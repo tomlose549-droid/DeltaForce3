@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DELTA FORCE - 多区域物资翻牌</title>
+  <style>
+    :root {
+      --text: #eaf4ff;
+      --muted: #90a8c3;
+      --accent: #86c8ff;
+      --line: rgba(108, 155, 219, 0.26);
+      --card-w: min(28vw, 180px);
+      --card-h: calc(var(--card-w) * 1.38);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at 20% 18%, rgba(29, 77, 128, 0.32), transparent 28%),
+        radial-gradient(circle at 80% 12%, rgba(39, 102, 77, 0.20), transparent 24%),
+        linear-gradient(180deg, #09111b 0%, #06090f 100%);
+      color: var(--text);
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: radial-gradient(circle at center, black 40%, transparent 95%);
+      pointer-events: none;
+      opacity: 0.4;
+    }
+
+    .hud {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 22px;
+      padding: 24px 16px 42px;
+    }
+
+    .title-box {
+      position: absolute;
+      top: 20px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .label-panel {
+      padding: 10px 14px;
+      background: linear-gradient(180deg, rgba(16, 28, 44, 0.82), rgba(8, 13, 21, 0.72));
+      border: 1px solid var(--line);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03), 0 10px 30px rgba(0,0,0,0.25);
+      backdrop-filter: blur(8px);
+      clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
+    }
+
+    .label-panel strong {
+      display: block;
+      font-size: 14px;
+      letter-spacing: 0.24em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .label-panel span {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    .toolbar {
+      position: absolute;
+      top: 82px;
+      right: 16px;
+      z-index: 6;
+    }
+
+    .codex-button,
+    .arrow-button,
+    .map-button,
+    .codex-close {
+      cursor: pointer;
+      transition: transform 0.18s ease, filter 0.18s ease, opacity 0.18s ease;
+    }
+
+    .codex-button:hover,
+    .arrow-button:hover,
+    .map-button:hover,
+    .codex-close:hover,
+    .codex-button:focus-visible,
+    .arrow-button:focus-visible,
+    .map-button:focus-visible,
+    .codex-close:focus-visible {
+      transform: translateY(-2px);
+      outline: none;
+    }
+
+    .codex-button {
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(141, 190, 255, 0.28);
+      background: linear-gradient(180deg, rgba(16, 28, 44, 0.92), rgba(8, 13, 21, 0.82));
+      color: var(--text);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+    }
+
+    .map-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      width: 100%;
+      min-height: calc(var(--card-h) + 24px);
+      z-index: 2;
+    }
+
+    .arrow-button {
+      width: 44px;
+      height: 64px;
+      border-radius: 12px;
+      border: 1px solid rgba(141, 190, 255, 0.28);
+      background: linear-gradient(180deg, rgba(19, 31, 48, 0.92), rgba(7, 10, 16, 0.82));
+      color: #d7ecff;
+      font-size: 26px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.28);
+    }
+
+    .map-button {
+      width: var(--card-w);
+      height: var(--card-h);
+      padding: 0;
+      position: relative;
+      background: none;
+      border: none;
+      filter: drop-shadow(0 18px 30px rgba(0,0,0,0.38));
+    }
+
+    .shell,
+    .card-face {
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .tactical-frame {
+      border: 1px solid rgba(141, 190, 255, 0.28);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04), inset 0 0 28px rgba(47, 110, 180, 0.12), 0 14px 35px rgba(0,0,0,0.35);
+    }
+
+    .shell {
+      background: radial-gradient(circle at 50% 32%, rgba(78, 146, 220, 0.16), transparent 25%), linear-gradient(145deg, #090909, #111111 45%, #050505 100%);
+    }
+
+    .shell::before,
+    .card-back::before {
+      content: "";
+      position: absolute;
+      inset: 10px;
+      border-radius: 14px;
+      background:
+        linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 50%, transparent 100%),
+        linear-gradient(0deg, transparent 0%, rgba(255,255,255,0.02) 50%, transparent 100%),
+        repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0 2px, transparent 2px 10px);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .core {
+      position: absolute;
+      inset: 22px;
+      border-radius: 14px;
+      border: 1px solid rgba(151, 214, 255, 0.12);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(180deg, rgba(18, 31, 46, 0.72), rgba(7, 11, 17, 0.35));
+      padding: 10px;
+    }
+
+    .button-title {
+      color: #dff1ff;
+      font-size: clamp(18px, 3vw, 26px);
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-align: center;
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      text-shadow: 0 0 16px rgba(122, 198, 255, 0.18);
+      user-select: none;
+    }
+
+    .map-cost {
+      position: absolute;
+      left: 50%;
+      bottom: 14px;
+      transform: translateX(-50%);
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      color: #eaf4ff;
+      background: rgba(10, 16, 26, 0.72);
+      border: 1px solid rgba(141, 190, 255, 0.18);
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    .spawn-area {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: clamp(10px, 2.6vw, 26px);
+      min-height: calc(var(--card-h) + 24px);
+      perspective: 1400px;
+    }
+
+    .cards.hidden {
+      display: none;
+    }
+
+    .game-card {
+      width: var(--card-w);
+      height: var(--card-h);
+      position: relative;
+      transform-style: preserve-3d;
+      cursor: pointer;
+      animation: popIn 0.56s cubic-bezier(0.2, 0.85, 0.25, 1);
+      will-change: transform, opacity;
+    }
+
+    .game-card:nth-child(1) { animation-delay: 0.02s; }
+    .game-card:nth-child(2) { animation-delay: 0.09s; }
+    .game-card:nth-child(3) { animation-delay: 0.16s; }
+
+    .card-inner {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+      transition: transform 0.72s cubic-bezier(0.2, 0.75, 0.2, 1);
+    }
+
+    .game-card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-face {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    .card-back {
+      background: linear-gradient(145deg, #000000, #131313 45%, #070707 100%);
+    }
+
+    .card-front {
+      transform: rotateY(180deg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 12px 14px;
+      color: #0c1116;
+      text-align: center;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.16);
+    }
+
+    .card-front::before {
+      content: "";
+      position: absolute;
+      inset: 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(12, 17, 24, 0.12);
+      pointer-events: none;
+    }
+
+    .card-topline {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      z-index: 1;
+      opacity: 0;
+      transform: translateY(-6px) translateZ(6px);
+      transition: opacity 0.28s ease, transform 0.28s ease;
+      transition-delay: 0.08s;
+    }
+
+    .icon-wrap {
+      position: relative;
+      z-index: 1;
+      width: 72%;
+      aspect-ratio: 1 / 1;
+      display: grid;
+      place-items: center;
+      filter: drop-shadow(0 10px 10px rgba(0,0,0,0.18));
+      transition: transform 0.34s ease, opacity 0.34s ease;
+      transform: translateZ(6px);
+    }
+
+    .item-name {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      padding: 10px 8px 0;
+      font-size: clamp(13px, 1.8vw, 16px);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: #0d1622;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.15);
+      opacity: 0;
+      transform: translateY(8px) translateZ(6px);
+      transition: opacity 0.32s ease, transform 0.32s ease;
+      transition-delay: 0.18s;
+      white-space: nowrap;
+    }
+
+    .game-card.flipped .item-name,
+    .game-card.flipped .card-topline {
+      opacity: 1;
+      transform: translateY(0) translateZ(6px);
+    }
+
+    .game-card.flipped .icon-wrap {
+      transform: scale(1.03) translateZ(6px);
+    }
+
+    .rarity-tag {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      opacity: 0.58;
+      transform: translateZ(6px);
+    }
+
+    .game-card.removing {
+      animation: fadeOut 0.42s ease forwards;
+      pointer-events: none;
+    }
+
+    .burn-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      overflow: hidden;
+      border-radius: var(--radius);
+      z-index: 4;
+      mix-blend-mode: screen;
+    }
+
+    .game-card.removing .burn-layer {
+      opacity: 1;
+    }
+
+    .flame {
+      position: absolute;
+      bottom: -12px;
+      width: 30%;
+      aspect-ratio: 0.62 / 1;
+      background: radial-gradient(circle at 50% 68%, rgba(255,245,182,0.95) 0 20%, rgba(255,163,58,0.95) 35%, rgba(255,78,23,0.85) 68%, rgba(255,0,0,0) 100%);
+      border-radius: 50% 50% 55% 55%;
+      filter: blur(1px);
+      transform-origin: bottom center;
+      animation: flameRise 0.5s ease-out forwards;
+    }
+
+    .flame.f1 { left: 8%; }
+    .flame.f2 { left: 34%; width: 34%; animation-delay: 0.04s; }
+    .flame.f3 { left: 62%; width: 26%; animation-delay: 0.08s; }
+
+    .bg-white { background: linear-gradient(180deg, #fcfcfc 0%, #e7eaee 100%); }
+    .bg-green { background: linear-gradient(180deg, #78b98f 0%, #497a59 100%); }
+    .bg-blue  { background: linear-gradient(180deg, #78a6d7 0%, #406182 100%); }
+    .bg-purple{ background: linear-gradient(180deg, #9d84cb 0%, #61467f 100%); }
+    .bg-gold  { background: linear-gradient(180deg, #f4d97d 0%, #bf9434 100%); }
+    .bg-red   { background: linear-gradient(180deg, #d86d6d 0%, #962d2d 100%); }
+
+    .icon-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .icon-svg .s-dark { fill: rgba(13,19,28,0.92); }
+    .icon-svg .s-mid { fill: rgba(24,36,48,0.78); }
+    .icon-svg .s-light { fill: rgba(255,255,255,0.82); }
+    .icon-svg .stroke { stroke: rgba(13,19,28,0.92); stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; fill: none; }
+
+    .hint {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-align: center;
+      padding: 10px 14px;
+      background: rgba(7,11,18,0.42);
+      border: 1px solid rgba(112,156,212,0.18);
+      border-radius: 999px;
+      backdrop-filter: blur(4px);
+      max-width: calc(100vw - 24px);
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      top: 88px;
+      transform: translateX(-50%);
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(116,12,12,0.88);
+      color: #ffd7d7;
+      border: 1px solid rgba(255,98,98,0.28);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s ease;
+      z-index: 20;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    .codex-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(5,8,14,0.72);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 30;
+      padding: 18px;
+    }
+
+    .codex-overlay.open {
+      display: flex;
+    }
+
+    .codex-panel {
+      width: min(920px, 100%);
+      max-height: min(84vh, 860px);
+      overflow: auto;
+      background: linear-gradient(180deg, rgba(13,21,34,0.96), rgba(7,10,17,0.96));
+      border: 1px solid rgba(141,190,255,0.24);
+      border-radius: 22px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+      padding: 20px;
+    }
+
+    .codex-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .codex-title {
+      font-size: 20px;
+      letter-spacing: 0.14em;
+      color: #dff1ff;
+      font-weight: 800;
+    }
+
+    .codex-close {
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(141,190,255,0.22);
+      background: rgba(15,25,39,0.9);
+      color: #dff1ff;
+    }
+
+    .codex-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 12px;
+    }
+
+    .codex-item {
+      background: linear-gradient(180deg, rgba(26,19,22,0.95), rgba(14,9,11,0.95));
+      border: 1px solid rgba(255,92,92,0.18);
+      border-radius: 16px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 210px;
+    }
+
+    .codex-item.locked {
+      background: linear-gradient(180deg, rgba(18,22,28,0.95), rgba(10,13,19,0.95));
+      border-color: rgba(141,190,255,0.12);
+    }
+
+    .codex-icon {
+      height: 90px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(180deg, #d86d6d 0%, #962d2d 100%);
+    }
+
+    .codex-item.locked .codex-icon {
+      background: linear-gradient(180deg, #3b4653 0%, #1e252d 100%);
+      color: #92a2b5;
+      font-size: 26px;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+    }
+
+    .codex-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #f5f8ff;
+      letter-spacing: 0.04em;
+    }
+
+    .codex-price {
+      color: #f1b6b6;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+    }
+
+    .codex-item.locked .codex-name,
+    .codex-item.locked .codex-price {
+      color: #96a5b7;
+    }
+
+    @keyframes popIn {
+      0% { opacity: 0; transform: translateY(28px) scale(0.78); }
+      55% { opacity: 1; transform: translateY(-6px) scale(1.03); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes fadeOut {
+      0% { opacity: 1; transform: scale(1); filter: brightness(1); }
+      35% { opacity: 1; transform: translateY(-2px) scale(1.02); filter: brightness(1.18); }
+      100% { opacity: 0; transform: translateY(16px) scale(0.86); filter: brightness(0.7); }
+    }
+
+    @keyframes flameRise {
+      0% { opacity: 0; transform: translateY(12px) scale(0.7); }
+      20% { opacity: 0.95; }
+      100% { opacity: 0; transform: translateY(-26px) scale(1.25); }
+    }
+
+    @media (max-width: 780px) {
+      :root { --card-w: min(28vw, 144px); }
+      .hud { padding-top: 88px; gap: 20px; }
+      .title-box { top: 10px; }
+      .label-panel strong { font-size: 12px; }
+      .label-panel span { font-size: 11px; }
+      .toolbar { top: 76px; }
+    }
+
+    @media (max-width: 480px) {
+      :root { --card-w: 29vw; }
+      .title-box { flex-direction: column; align-items: stretch; }
+      .arrow-button { width: 38px; height: 58px; }
+      .item-name { font-size: 12px; padding-top: 6px; }
+      .icon-wrap { width: 76%; }
+      .codex-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <main class="hud">
+    <div class="title-box">
+      <div class="label-panel">
+        <strong>DELTA FORCE</strong>
+        <span id="mapNameTop">当前区域：零号大坝</span>
+      </div>
+      <div class="label-panel">
+        <strong>LEO</strong>
+        <span id="coinCount">哈弗币：0</span>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button class="codex-button" id="codexButton" aria-label="打开图鉴">图鉴</button>
+    </div>
+
+    <section class="map-row">
+      <button class="arrow-button" id="prevMap" aria-label="上一个卡池">◀</button>
+      <button class="map-button" id="drawButton" aria-label="进入当前区域并生成三张卡牌">
+        <div class="shell tactical-frame">
+          <div class="core">
+            <div class="button-title" id="buttonTitle">零号大坝</div>
+          </div>
+          <div class="map-cost" id="mapCost">消耗：0 哈弗币</div>
+        </div>
+      </button>
+      <button class="arrow-button" id="nextMap" aria-label="下一个卡池">▶</button>
+    </section>
+
+    <section class="spawn-area cards hidden" id="cardsArea" aria-live="polite"></section>
+    <div class="hint">点击当前区域按钮：先发放上次累计哈弗币，再判断是否足够进入当前区域，并生成 3 张物资卡。</div>
+    <div class="toast" id="toast"></div>
+  </main>
+
+  <div class="codex-overlay" id="codexOverlay" aria-hidden="true">
+    <section class="codex-panel">
+      <div class="codex-header">
+        <div class="codex-title">红色物资图鉴</div>
+        <button class="codex-close" id="codexClose">关闭</button>
+      </div>
+      <div class="codex-grid" id="codexGrid"></div>
+    </section>
+  </div>
+
+  <script>
+    const COIN_CAP = 5000;
+    let coinBalance = 0;
+    let pendingCoins = 0;
+    let currentMapIndex = 0;
+    let toastTimer = null;
+    let audioCtx = null;
+
+    const RED_ITEMS = [
+      { name: '劳力士', icon: 'rolex', coins: 70 },
+      { name: '金条', icon: 'goldbar', coins: 78 },
+      { name: '香槟', icon: 'champagne', coins: 79 },
+      { name: '黄金瞪羚', icon: 'gazelle', coins: 98 },
+      { name: '天圆地方', icon: 'squarecoin', coins: 105 },
+      { name: '半身像', icon: 'bust', coins: 128 },
+      { name: '留音机', icon: 'gramophone', coins: 129 },
+      { name: '步战车模型', icon: 'ifv', coins: 130 },
+      { name: '军用炮弹', icon: 'shell', coins: 142 },
+      { name: '扫地机器人', icon: 'robot', coins: 195 },
+      { name: '微型反应炉', icon: 'reactor', coins: 245 },
+      { name: '万金泪冠', icon: 'crown', coins: 293 },
+      { name: '纵横棋盘', icon: 'board', coins: 299 },
+      { name: '非洲之心', icon: 'heartgem', coins: 1314 }
+    ];
+
+    const discoveredRedItems = new Set();
+
+    const maps = [
+      {
+        name: '零号大坝',
+        cost: 0,
+        loot: [
+          { name: '盒装蜡烛', weight: 25, bg: 'bg-white', rarity: '常规', icon: 'candle', coins: 2 },
+          { name: '酸奶', weight: 25, bg: 'bg-white', rarity: '常规', icon: 'yogurt', coins: 1 },
+          { name: '石工锤', weight: 15, bg: 'bg-green', rarity: '标准', icon: 'hammer', coins: 3 },
+          { name: '角磨机', weight: 15, bg: 'bg-green', rarity: '标准', icon: 'grinder', coins: 4 },
+          { name: '摄像头', weight: 6, bg: 'bg-blue', rarity: '侦察', icon: 'camera', coins: 10 },
+          { name: '一桶油漆', weight: 4, bg: 'bg-blue', rarity: '侦察', icon: 'paint', coins: 16 },
+          { name: '海盗弯刀', weight: 2.5, bg: 'bg-purple', rarity: '稀有', icon: 'cutlass', coins: 24 },
+          { name: '牛角', weight: 3.5, bg: 'bg-purple', rarity: '稀有', icon: 'horn', coins: 21 },
+          { name: '海盗金币', weight: 1.8, bg: 'bg-gold', rarity: '金色', icon: 'coin', coins: 35 },
+          { name: '座钟', weight: 0.7, bg: 'bg-gold', rarity: '金色', icon: 'clock', coins: 50 },
+          { name: '劳力士', weight: 0.5, bg: 'bg-red', rarity: '史诗', icon: 'rolex', coins: 70 },
+          { name: '金条', weight: 0.55, bg: 'bg-red', rarity: '史诗', icon: 'goldbar', coins: 78 },
+          { name: '黄金瞪羚', weight: 0.3, bg: 'bg-red', rarity: '史诗', icon: 'gazelle', coins: 98 },
+          { name: '军用炮弹', weight: 0.12, bg: 'bg-red', rarity: '史诗', icon: 'shell', coins: 142 },
+          { name: '微型反应炉', weight: 0.026, bg: 'bg-red', rarity: '史诗', icon: 'reactor', coins: 245 },
+          { name: '非洲之心', weight: 0.004, bg: 'bg-red', rarity: '传说', icon: 'heartgem', coins: 1314 }
+        ]
+      },
+      {
+        name: '长弓溪谷',
+        cost: 4,
+        loot: [
+          { name: '酸奶', weight: 20, bg: 'bg-white', rarity: '常规', icon: 'yogurt', coins: 1 },
+          { name: '盒装蜡烛', weight: 20, bg: 'bg-white', rarity: '常规', icon: 'candle', coins: 2 },
+          { name: '石工锤', weight: 18, bg: 'bg-green', rarity: '标准', icon: 'hammer', coins: 3 },
+          { name: '角磨机', weight: 17, bg: 'bg-green', rarity: '标准', icon: 'grinder', coins: 4 },
+          { name: '摄像头', weight: 10, bg: 'bg-blue', rarity: '侦察', icon: 'camera', coins: 10 },
+          { name: '一桶油漆', weight: 5, bg: 'bg-blue', rarity: '侦察', icon: 'paint', coins: 16 },
+          { name: '海盗弯刀', weight: 2.5, bg: 'bg-purple', rarity: '稀有', icon: 'cutlass', coins: 24 },
+          { name: '牛角', weight: 3.5, bg: 'bg-purple', rarity: '稀有', icon: 'horn', coins: 21 },
+          { name: '海盗金币', weight: 1.8, bg: 'bg-gold', rarity: '金色', icon: 'coin', coins: 35 },
+          { name: '座钟', weight: 0.7, bg: 'bg-gold', rarity: '金色', icon: 'clock', coins: 50 },
+          { name: '香槟', weight: 1, bg: 'bg-red', rarity: '史诗', icon: 'champagne', coins: 79 },
+          { name: '黄金瞪羚', weight: 0.35, bg: 'bg-red', rarity: '史诗', icon: 'gazelle', coins: 98 },
+          { name: '半身像', weight: 0.038, bg: 'bg-red', rarity: '史诗', icon: 'bust', coins: 128 },
+          { name: '留音机', weight: 0.038, bg: 'bg-red', rarity: '史诗', icon: 'gramophone', coins: 129 },
+          { name: '步战车模型', weight: 0.038, bg: 'bg-red', rarity: '史诗', icon: 'ifv', coins: 130 },
+          { name: '扫地机器人', weight: 0.032, bg: 'bg-red', rarity: '史诗', icon: 'robot', coins: 195 },
+          { name: '非洲之心', weight: 0.004, bg: 'bg-red', rarity: '传说', icon: 'heartgem', coins: 1314 }
+        ]
+      },
+      {
+        name: '巴克十',
+        cost: 45,
+        loot: [
+          { name: '石工锤', weight: 30, bg: 'bg-green', rarity: '标准', icon: 'hammer', coins: 3 },
+          { name: '角磨机', weight: 30, bg: 'bg-green', rarity: '标准', icon: 'grinder', coins: 4 },
+          { name: '摄像头', weight: 13, bg: 'bg-blue', rarity: '侦察', icon: 'camera', coins: 10 },
+          { name: '一桶油漆', weight: 7, bg: 'bg-blue', rarity: '侦察', icon: 'paint', coins: 16 },
+          { name: '海盗弯刀', weight: 5.5, bg: 'bg-purple', rarity: '稀有', icon: 'cutlass', coins: 24 },
+          { name: '牛角', weight: 6, bg: 'bg-purple', rarity: '稀有', icon: 'horn', coins: 21 },
+          { name: '海盗金币', weight: 3.5, bg: 'bg-gold', rarity: '金色', icon: 'coin', coins: 35 },
+          { name: '座钟', weight: 2, bg: 'bg-gold', rarity: '金色', icon: 'clock', coins: 50 },
+          { name: '香槟', weight: 1, bg: 'bg-red', rarity: '史诗', icon: 'champagne', coins: 79 },
+          { name: '黄金瞪羚', weight: 0.45, bg: 'bg-red', rarity: '史诗', icon: 'gazelle', coins: 98 },
+          { name: '劳力士', weight: 0.5, bg: 'bg-red', rarity: '史诗', icon: 'rolex', coins: 70 },
+          { name: '天圆地方', weight: 0.45, bg: 'bg-red', rarity: '史诗', icon: 'squarecoin', coins: 105 },
+          { name: '半身像', weight: 0.19, bg: 'bg-red', rarity: '史诗', icon: 'bust', coins: 128 },
+          { name: '留音机', weight: 0.19, bg: 'bg-red', rarity: '史诗', icon: 'gramophone', coins: 129 },
+          { name: '扫地机器人', weight: 0.06, bg: 'bg-red', rarity: '史诗', icon: 'robot', coins: 195 },
+          { name: '万金泪冠', weight: 0.076, bg: 'bg-red', rarity: '史诗', icon: 'crown', coins: 293 },
+          { name: '纵横棋盘', weight: 0.074, bg: 'bg-red', rarity: '史诗', icon: 'board', coins: 299 },
+          { name: '非洲之心', weight: 0.01, bg: 'bg-red', rarity: '传说', icon: 'heartgem', coins: 1314 }
+        ]
+      }
+    ];
+
+    const cardsArea = document.getElementById('cardsArea');
+    const drawButton = document.getElementById('drawButton');
+    const coinCount = document.getElementById('coinCount');
+    const buttonTitle = document.getElementById('buttonTitle');
+    const mapCost = document.getElementById('mapCost');
+    const mapNameTop = document.getElementById('mapNameTop');
+    const toast = document.getElementById('toast');
+    const prevMap = document.getElementById('prevMap');
+    const nextMap = document.getElementById('nextMap');
+    const codexButton = document.getElementById('codexButton');
+    const codexOverlay = document.getElementById('codexOverlay');
+    const codexClose = document.getElementById('codexClose');
+    const codexGrid = document.getElementById('codexGrid');
+
+    function getCurrentMap() {
+      return maps[currentMapIndex];
+    }
+
+    function updateCoinUI() {
+      coinCount.textContent = `哈弗币：${coinBalance}`;
+    }
+
+    function updateMapUI() {
+      const map = getCurrentMap();
+      buttonTitle.textContent = map.name;
+      mapNameTop.textContent = `当前区域：${map.name}`;
+      mapCost.textContent = `消耗：${map.cost} 哈弗币`;
+      drawButton.setAttribute('aria-label', `进入${map.name}，发放哈弗币并生成三张卡牌`);
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 1800);
+    }
+
+    function payoutPendingCoins() {
+      if (pendingCoins <= 0) return 0;
+      const canReceive = Math.max(0, COIN_CAP - coinBalance);
+      const received = Math.min(canReceive, pendingCoins);
+      coinBalance += received;
+      pendingCoins = 0;
+      updateCoinUI();
+      return received;
+    }
+
+    function pickLoot(table) {
+      const totalWeight = table.reduce((sum, item) => sum + item.weight, 0);
+      let roll = Math.random() * totalWeight;
+      for (const item of table) {
+        roll -= item.weight;
+        if (roll <= 0) return item;
+      }
+      return table[table.length - 1];
+    }
+
+    function getAudioCtx() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return null;
+        audioCtx = new AudioContextClass();
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+
+    function tone({ type = 'sine', frequency = 440, start = 0, duration = 0.12, gain = 0.05, endFrequency = frequency }) {
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+      const osc = ctx.createOscillator();
+      const vol = ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(frequency, ctx.currentTime + start);
+      osc.frequency.exponentialRampToValueAtTime(Math.max(30, endFrequency), ctx.currentTime + start + duration);
+      vol.gain.setValueAtTime(0.0001, ctx.currentTime + start);
+      vol.gain.exponentialRampToValueAtTime(gain, ctx.currentTime + start + 0.015);
+      vol.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + start + duration);
+      osc.connect(vol).connect(ctx.destination);
+      osc.start(ctx.currentTime + start);
+      osc.stop(ctx.currentTime + start + duration + 0.02);
+    }
+
+    function noiseBurst({ duration = 0.2, gain = 0.04 }) {
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+      const buffer = ctx.createBuffer(1, Math.floor(ctx.sampleRate * duration), ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++) {
+        data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+      }
+      const src = ctx.createBufferSource();
+      const filter = ctx.createBiquadFilter();
+      const vol = ctx.createGain();
+      filter.type = 'lowpass';
+      filter.frequency.value = 1200;
+      src.buffer = buffer;
+      vol.gain.setValueAtTime(0.0001, ctx.currentTime);
+      vol.gain.exponentialRampToValueAtTime(gain, ctx.currentTime + 0.02);
+      vol.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+      src.connect(filter).connect(vol).connect(ctx.destination);
+      src.start();
+    }
+
+    function playFlipSound() {
+      tone({ type: 'triangle', frequency: 320, endFrequency: 540, duration: 0.11, gain: 0.04 });
+      tone({ type: 'sine', frequency: 460, start: 0.03, endFrequency: 380, duration: 0.09, gain: 0.02 });
+    }
+
+    function playGoldSound() {
+      tone({ type: 'sine', frequency: 880, duration: 0.16, gain: 0.065, endFrequency: 1180 });
+      tone({ type: 'triangle', frequency: 1320, start: 0.04, duration: 0.22, gain: 0.032, endFrequency: 1460 });
+    }
+
+    function playRedSound() {
+      [660, 990, 1320].forEach((note, index) => {
+        tone({ type: 'triangle', frequency: note, start: index * 0.055, duration: 0.22, gain: 0.03, endFrequency: note * 0.98 });
+      });
+    }
+
+    function playBurnSound() {
+      noiseBurst({ duration: 0.26, gain: 0.045 });
+      tone({ type: 'sawtooth', frequency: 220, duration: 0.18, gain: 0.018, endFrequency: 110 });
+      tone({ type: 'triangle', frequency: 520, start: 0.04, duration: 0.16, gain: 0.012, endFrequency: 260 });
+    }
+
+    function iconMarkup(type) {
+      const icons = {
+        candle: `<svg class="icon-svg" viewBox="0 0 100 100"><rect x="23" y="20" width="54" height="62" rx="7" class="s-dark" opacity="0.12"></rect><rect x="28" y="26" width="44" height="52" rx="6" class="s-light"></rect><rect x="34" y="36" width="32" height="28" rx="4" class="s-mid"></rect><rect x="41" y="46" width="6" height="18" class="s-light"></rect><rect x="53" y="42" width="6" height="22" class="s-light"></rect><path d="M44 33 C42 27, 49 24, 50 18 C55 24, 58 28, 56 33 C54 38, 46 38, 44 33 Z" class="s-dark"></path></svg>`,
+        yogurt: `<svg class="icon-svg" viewBox="0 0 100 100"><path d="M34 28 H66 L62 76 H38 Z" class="s-light"></path><path d="M30 30 H70" class="stroke"></path><path d="M38 26 C42 18, 58 18, 62 26" class="stroke"></path><path d="M42 48 C47 38, 59 42, 58 53 C57 62, 43 62, 42 48 Z" class="s-mid"></path><circle cx="55" cy="46" r="5" class="s-light"></circle></svg>`,
+        hammer: `<svg class="icon-svg" viewBox="0 0 100 100"><path d="M28 34 H59 C67 34 72 28 78 28 H82 V45 H55 L46 54 Z" class="s-dark"></path><rect x="42" y="48" width="12" height="36" rx="5" transform="rotate(35 48 66)" class="s-light"></rect><path d="M66 28 L76 18 L82 24 L74 33 Z" class="s-mid"></path></svg>`,
+        grinder: `<svg class="icon-svg" viewBox="0 0 100 100"><circle cx="40" cy="56" r="15" class="s-light"></circle><circle cx="40" cy="56" r="8" class="s-mid"></circle><rect x="47" y="43" width="22" height="12" rx="4" transform="rotate(-18 58 49)" class="s-dark"></rect><rect x="61" y="35" width="11" height="28" rx="4" transform="rotate(-18 66 49)" class="s-mid"></rect></svg>`,
+        camera: `<svg class="icon-svg" viewBox="0 0 100 100"><rect x="23" y="36" width="54" height="32" rx="8" class="s-dark"></rect><circle cx="50" cy="52" r="13" class="s-light"></circle><circle cx="50" cy="52" r="8" class="s-mid"></circle><rect x="33" y="28" width="16" height="10" rx="3" class="s-mid"></rect><circle cx="67" cy="43" r="3" class="s-light"></circle></svg>`,
+        paint: `<svg class="icon-svg" viewBox="0 0 100 100"><path d="M34 28 H66 L62 78 H38 Z" class="s-light"></path><path d="M38 28 C40 19, 60 19, 62 28" class="stroke"></path><path d="M42 50 C48 44, 56 44, 60 51 C56 60, 48 65, 41 61 C39 58, 39 54, 42 50 Z" class="s-mid"></path></svg>`,
+        cutlass: `<svg class="icon-svg" viewBox="0 0 100 100"><path d="M20 67 C42 63, 58 51, 76 24 C77 23, 80 24, 80 26 C68 50, 53 66, 30 76 Z" class="s-light"></path><path d="M32 69 C37 66, 40 68, 44 73 C38 78, 33 79, 27 76 Z" class="s-dark"></path><path d="M43 72 Q53 63 60 72" class="stroke"></path></svg>`,
+        horn: `<svg class="icon-svg" viewBox="0 0 100 100"><path d="M34 22 C18 34, 16 60, 37 74 C49 82, 66 78, 74 62 C78 55, 80 43, 74 34 C69 27, 62 26, 57 28 C63 37, 61 52, 51 59 C44 64, 36 66, 28 62 C22 49, 25 34, 34 22 Z" class="s-light"></path><path d="M50 37 C55 41, 56 49, 52 54" class="stroke"></path></svg>`,
+        coin: `<svg class="icon-svg" viewBox="0 0 100 100"><ellipse cx="50" cy="50" rx="26" ry="26" class="s-light"></ellipse><ellipse cx="50" cy="50" rx="19" ry="19" class="s-mid"></ellipse><path d="M50 37 L54 46 L64 46 L56 52 L60 62 L50 56 L40 62 L44 52 L36 46 L46 46 Z" class="s-light"></path></svg>`,
+        clock: `<svg class="icon-svg" viewBox="0 0 100 100"><rect x="34" y="18" width="32" height="60" rx="10" class="s-dark"></rect><circle cx="50" cy="46" r="14" class="s-light"></circle><circle cx="50" cy="46" r="2.8" class="s-dark"></circle><path d="M50 46 L50 37" class="stroke"></path><path d="M50 46 L58 50" class="stroke"></path></svg>`,
+        rolex: `<svg class="icon-svg" viewBox="0 0 100 100"><rect x="42" y="12" width="16" height="16" rx="6" class="s-mid"></rect><rect x="42" y="72" width="16" height="16" rx="6" class="s-mid"></rect><circle cx="50" cy="50" r="22" class="s-light"></circle><circle cx="50" cy="50" r="16" class="s-mid"></circle><path d="M50 50 L50 40" class="stroke"></path><path d="M50 50 L58 55" class="stroke"></path></svg>`,
+        goldbar: `<svg class="icon-svg" viewBox="0 0 100 100"><path d="M24 60 L38 34 H68 L54 60 Z" class="s-light"></path><path d="M54 60 L68 34 L80 60 Z" class="s-mid"></path><path d="M24 60 H80 L72 72 H32 Z" class="s-dark"></path></svg>`,
+        gazelle: `<svg class="icon-svg" viewBox="0 0 100 100"><path d="M30 61 C40 49, 54 45, 68 49 C72 53, 73 58, 71 63 C60 69, 45 71, 32 69 Z" class="s-light"></path><path d="M63 42 C64 29, 69 23, 74 18" class="stroke"></path><path d="M57 42 C55 30, 51 24, 46 18" class="stroke"></path></svg>`,
+        shell: `<svg class="icon-svg" viewBox="0 0 100 100"><path d="M44 18 H56 V62 C56 74, 44 74, 44 62 Z" class="s-light"></path><path d="M44 62 H56 V76 H44 Z" class="s-mid"></path></svg>`,
+        reactor: `<svg class="icon-svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="10" class="s-dark"></circle><path d="M50 23 C63 23, 70 32, 70 42 C62 46, 56 50, 50 50 C48 41, 45 34, 50 23 Z" class="s-light"></path><path d="M28 61 C22 49, 26 39, 34 34 C42 38, 48 41, 50 50 C42 54, 35 59, 28 61 Z" class="s-light"></path><path d="M72 61 C58 65, 48 61, 44 53 C48 45, 51 40, 50 50 C57 51, 65 55, 72 61 Z" class="s-light"></path></svg>`,
+        champagne: `<svg class="icon-svg" viewBox="0 0 100 100"><path d="M36 20 H64 C64 42 59 52 50 58 C41 52 36 42 36 20 Z" class="s-light"></path><path d="M50 58 V75" class="stroke"></path><path d="M42 80 H58" class="stroke"></path></svg>`,
+        bust: `<svg class="icon-svg" viewBox="0 0 100 100"><circle cx="50" cy="32" r="13" class="s-light"></circle><path d="M34 60 C39 48, 61 48, 66 60 L71 76 H29 Z" class="s-mid"></path></svg>`,
+        gramophone: `<svg class="icon-svg" viewBox="0 0 100 100"><path d="M61 20 C79 20, 82 44, 66 49 C56 52, 48 47, 44 41 C50 33, 54 28, 61 20 Z" class="s-light"></path><rect x="44" y="43" width="8" height="16" class="s-mid"></rect><rect x="32" y="59" width="36" height="14" rx="3" class="s-dark"></rect></svg>`,
+        ifv: `<svg class="icon-svg" viewBox="0 0 100 100"><rect x="26" y="47" width="42" height="18" rx="6" class="s-dark"></rect><rect x="44" y="39" width="18" height="10" rx="3" class="s-mid"></rect><rect x="58" y="42" width="18" height="4" rx="2" class="s-light"></rect><circle cx="36" cy="69" r="7" class="s-light"></circle><circle cx="50" cy="69" r="7" class="s-light"></circle><circle cx="64" cy="69" r="7" class="s-light"></circle></svg>`,
+        robot: `<svg class="icon-svg" viewBox="0 0 100 100"><circle cx="50" cy="52" r="22" class="s-light"></circle><circle cx="42" cy="50" r="4" class="s-dark"></circle><circle cx="58" cy="50" r="4" class="s-dark"></circle><path d="M38 61 Q50 68 62 61" class="stroke"></path><path d="M50 20 V30" class="stroke"></path></svg>`,
+        squarecoin: `<svg class="icon-svg" viewBox="0 0 100 100"><rect x="25" y="25" width="50" height="50" rx="10" class="s-light"></rect><rect x="40" y="40" width="20" height="20" rx="4" class="s-mid"></rect><path d="M25 50 H75" class="stroke" opacity="0.4"></path></svg>`,
+        crown: `<svg class="icon-svg" viewBox="0 0 100 100"><path d="M24 68 L32 35 L49 52 L66 31 L76 68 Z" class="s-light"></path><rect x="26" y="68" width="48" height="10" rx="3" class="s-mid"></rect></svg>`,
+        board: `<svg class="icon-svg" viewBox="0 0 100 100"><rect x="26" y="26" width="48" height="48" rx="4" class="s-light"></rect><path d="M42 26 V74 M58 26 V74 M26 42 H74 M26 58 H74" class="stroke"></path></svg>`,
+        heartgem: `<svg class="icon-svg" viewBox="0 0 100 100"><path d="M50 79 L24 48 C17 39, 20 24, 34 22 C42 21, 47 25, 50 31 C53 25, 58 21, 66 22 C80 24, 83 39, 76 48 Z" class="s-light"></path><circle cx="50" cy="51" r="9" class="s-mid"></circle></svg>`
+      };
+      return icons[type] || `<div style="font-size:28px;color:#fff">?</div>`;
+    }
+
+    function renderCodex() {
+      codexGrid.innerHTML = '';
+      RED_ITEMS.forEach((item) => {
+        const unlocked = discoveredRedItems.has(item.name);
+        const div = document.createElement('article');
+        div.className = `codex-item${unlocked ? '' : ' locked'}`;
+        if (unlocked) {
+          div.innerHTML = `
+            <div class="codex-icon">${iconMarkup(item.icon)}</div>
+            <div class="codex-name">${item.name}</div>
+            <div class="codex-price">${item.coins} 哈弗币</div>
+          `;
+        } else {
+          div.innerHTML = `
+            <div class="codex-icon">???</div>
+            <div class="codex-name">???</div>
+            <div class="codex-price">???</div>
+          `;
+        }
+        codexGrid.appendChild(div);
+      });
+    }
+
+    function createCard(item) {
+      const card = document.createElement('article');
+      card.className = 'game-card';
+      card.dataset.state = 'back';
+      card.dataset.counted = 'false';
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('aria-label', `${item.name} 卡牌`);
+
+      card.innerHTML = `
+        <div class="card-inner">
+          <div class="card-face card-back tactical-frame"></div>
+          <div class="card-face card-front tactical-frame ${item.bg}" lang="zh-CN">
+            <div class="card-topline"><span>LOOT</span><span>${item.rarity}</span></div>
+            <div class="icon-wrap">${iconMarkup(item.icon)}</div>
+            <div class="item-name">${item.name}</div>
+            <div class="rarity-tag">TAC-SUPPLY</div>
+          </div>
+          <div class="burn-layer" aria-hidden="true">
+            <span class="flame f1"></span>
+            <span class="flame f2"></span>
+            <span class="flame f3"></span>
+          </div>
+        </div>
+      `;
+
+      const activate = () => {
+        if (card.classList.contains('removing')) return;
+        if (card.dataset.state === 'back') {
+          card.dataset.state = 'front';
+          card.classList.add('flipped');
+          playFlipSound();
+          if (card.dataset.counted === 'false') {
+            pendingCoins += item.coins;
+            card.dataset.counted = 'true';
+          }
+          if (item.bg === 'bg-red') {
+            discoveredRedItems.add(item.name);
+            renderCodex();
+          }
+        } else {
+          card.dataset.state = 'gone';
+          card.classList.add('removing');
+          playBurnSound();
+          setTimeout(() => card.remove(), 420);
+        }
+      };
+
+      card.addEventListener('click', activate);
+      card.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          activate();
+        }
+      });
+
+      return card;
+    }
+
+    function enterCurrentMap() {
+      const map = getCurrentMap();
+      payoutPendingCoins();
+
+      if (coinBalance < map.cost) {
+        showToast('哈弗币不足');
+        return;
+      }
+
+      if (map.cost > 0) {
+        coinBalance -= map.cost;
+        updateCoinUI();
+      }
+
+      cardsArea.innerHTML = '';
+      const picks = [pickLoot(map.loot), pickLoot(map.loot), pickLoot(map.loot)];
+      picks.forEach((item) => cardsArea.appendChild(createCard(item)));
+      cardsArea.classList.remove('hidden');
+
+      if (picks.some((item) => item.bg === 'bg-gold')) {
+        setTimeout(playGoldSound, 180);
+      }
+      if (picks.some((item) => item.bg === 'bg-red')) {
+        setTimeout(playRedSound, 320);
+      }
+    }
+
+    drawButton.addEventListener('click', enterCurrentMap);
+    prevMap.addEventListener('click', () => {
+      currentMapIndex = (currentMapIndex - 1 + maps.length) % maps.length;
+      updateMapUI();
+    });
+    nextMap.addEventListener('click', () => {
+      currentMapIndex = (currentMapIndex + 1) % maps.length;
+      updateMapUI();
+    });
+
+    codexButton.addEventListener('click', () => {
+      renderCodex();
+      codexOverlay.classList.add('open');
+      codexOverlay.setAttribute('aria-hidden', 'false');
+    });
+
+    codexClose.addEventListener('click', () => {
+      codexOverlay.classList.remove('open');
+      codexOverlay.setAttribute('aria-hidden', 'true');
+    });
+
+    codexOverlay.addEventListener('click', (event) => {
+      if (event.target === codexOverlay) {
+        codexOverlay.classList.remove('open');
+        codexOverlay.setAttribute('aria-hidden', 'true');
+      }
+    });
+
+    updateCoinUI();
+    updateMapUI();
+    renderCodex();
+  </script>
+</body>
+</html>
