@@ -9,28 +9,22 @@ const COIN_CAP = 5000;
       { name: '劳力士', icon: 'rolex', coins: 70 },
       { name: '金条', icon: 'goldbar', coins: 78 },
       { name: '香槟', icon: 'champagne', coins: 79 },
-      { name: '渡鸦脑机数据', icon: 'ravenchip', coins: 75 },
       { name: '黄金瞪羚', icon: 'gazelle', coins: 98 },
-      { name: '卫星锅', icon: 'satdish', coins: 100 },
       { name: '天圆地方', icon: 'squarecoin', coins: 105 },
       { name: '半身像', icon: 'bust', coins: 128 },
       { name: '留音机', icon: 'gramophone', coins: 129 },
       { name: '步战车模型', icon: 'ifv', coins: 130 },
       { name: '军用炮弹', icon: 'shell', coins: 142 },
-      { name: '火箭燃料', icon: 'rocketfuel', coins: 180 },
-      { name: '浮力补偿设备', icon: 'buoyancy', coins: 189 },
       { name: '扫地机器人', icon: 'robot', coins: 195 },
-      { name: '雷明顿打字机', icon: 'typewriter', coins: 200 },
       { name: '微型反应炉', icon: 'reactor', coins: 245 },
       { name: '万金泪冠', icon: 'crown', coins: 293 },
       { name: '纵横棋盘', icon: 'board', coins: 299 },
-      { name: '装甲车电池', icon: 'apcbattery', coins: 666 },
-      { name: '复苏呼吸机', icon: 'ventilator', coins: 999 },
-      { name: '非洲之心', icon: 'heartgem', coins: 1314 },
-      { name: '海洋之泪', icon: 'oceantear', coins: 1999 }
+      { name: '非洲之心', icon: 'heartgem', coins: 1314 }
     ];
 
     const discoveredRedItems = new Set();
+
+const sortedRedItems = [...RED_ITEMS].sort((a,b)=>a.coins-b.coins);
 
     const maps = [
       {
@@ -80,7 +74,7 @@ const COIN_CAP = 5000;
       },
       {
         name: '巴克十',
-        cost: 43,
+        cost: 42,
         loot: [
           { name: '石工锤', weight: 30, bg: 'bg-green', rarity: '标准', icon: 'hammer', coins: 3 },
           { name: '角磨机', weight: 30, bg: 'bg-green', rarity: '标准', icon: 'grinder', coins: 4 },
@@ -100,79 +94,6 @@ const COIN_CAP = 5000;
           { name: '万金泪冠', weight: 0.076, bg: 'bg-red', rarity: '史诗', icon: 'crown', coins: 293 },
           { name: '纵横棋盘', weight: 0.074, bg: 'bg-red', rarity: '史诗', icon: 'board', coins: 299 },
           { name: '非洲之心', weight: 0.01, bg: 'bg-red', rarity: '传说', icon: 'heartgem', coins: 1314 }
-        ]
-      },
-      {
-        name: '黑夜大坝',
-        cost: 48,
-        loot: [
-          { name: '石工锤', weight: 25, bg: 'bg-green', rarity: '标准', icon: 'hammer', coins: 3 },
-          { name: '角磨机', weight: 25, bg: 'bg-green', rarity: '标准', icon: 'grinder', coins: 4 },
-          { name: '摄像头', weight: 18, bg: 'bg-blue', rarity: '侦察', icon: 'camera', coins: 10 },
-          { name: '一桶油漆', weight: 12, bg: 'bg-blue', rarity: '侦察', icon: 'paint', coins: 16 },
-          { name: '海盗弯刀', weight: 5.3, bg: 'bg-purple', rarity: '稀有', icon: 'cutlass', coins: 24 },
-          { name: '牛角', weight: 4.7, bg: 'bg-purple', rarity: '稀有', icon: 'horn', coins: 21 },
-          { name: '海盗金币', weight: 4.1, bg: 'bg-gold', rarity: '金色', icon: 'coin', coins: 35 },
-          { name: '座钟', weight: 2.9, bg: 'bg-gold', rarity: '金色', icon: 'clock', coins: 50 },
-          { name: '金条', weight: 1.3, bg: 'bg-red', rarity: '史诗', icon: 'goldbar', coins: 78 },
-          { name: '黄金瞪羚', weight: 0.75, bg: 'bg-red', rarity: '史诗', icon: 'gazelle', coins: 98 },
-          { name: '军用炮弹', weight: 0.3, bg: 'bg-red', rarity: '史诗', icon: 'shell', coins: 142 },
-          { name: '半身像', weight: 0.23, bg: 'bg-red', rarity: '史诗', icon: 'bust', coins: 128 },
-          { name: '留音机', weight: 0.23, bg: 'bg-red', rarity: '史诗', icon: 'gramophone', coins: 129 },
-          { name: '扫地机器人', weight: 0.065, bg: 'bg-red', rarity: '史诗', icon: 'robot', coins: 195 },
-          { name: '微型反应炉', weight: 0.1, bg: 'bg-red', rarity: '史诗', icon: 'reactor', coins: 245 },
-          { name: '非洲之心', weight: 0.01, bg: 'bg-red', rarity: '传说', icon: 'heartgem', coins: 1314 },
-          { name: '装甲车电池', weight: 0.015, bg: 'bg-red', rarity: '史诗', icon: 'apcbattery', coins: 666 }
-        ]
-      },
-      {
-        name: '航天基地',
-        cost: 58,
-        loot: [
-          { name: '石工锤', weight: 30, bg: 'bg-green', rarity: '标准', icon: 'hammer', coins: 3 },
-          { name: '角磨机', weight: 25, bg: 'bg-green', rarity: '标准', icon: 'grinder', coins: 4 },
-          { name: '摄像头', weight: 16, bg: 'bg-blue', rarity: '侦察', icon: 'camera', coins: 10 },
-          { name: '一桶油漆', weight: 9, bg: 'bg-blue', rarity: '侦察', icon: 'paint', coins: 16 },
-          { name: '海盗弯刀', weight: 5.4, bg: 'bg-purple', rarity: '稀有', icon: 'cutlass', coins: 24 },
-          { name: '牛角', weight: 4.6, bg: 'bg-purple', rarity: '稀有', icon: 'horn', coins: 21 },
-          { name: '海盗金币', weight: 4, bg: 'bg-gold', rarity: '金色', icon: 'coin', coins: 35 },
-          { name: '座钟', weight: 3, bg: 'bg-gold', rarity: '金色', icon: 'clock', coins: 50 },
-          { name: '香槟', weight: 0.75, bg: 'bg-red', rarity: '史诗', icon: 'champagne', coins: 79 },
-          { name: '金条', weight: 0.75, bg: 'bg-red', rarity: '史诗', icon: 'goldbar', coins: 78 },
-          { name: '黄金瞪羚', weight: 0.35, bg: 'bg-red', rarity: '史诗', icon: 'gazelle', coins: 98 },
-          { name: '卫星锅', weight: 0.55, bg: 'bg-red', rarity: '史诗', icon: 'satdish', coins: 100 },
-          { name: '步战车模型', weight: 0.23, bg: 'bg-red', rarity: '史诗', icon: 'ifv', coins: 130 },
-          { name: '军用炮弹', weight: 0.22, bg: 'bg-red', rarity: '史诗', icon: 'shell', coins: 142 },
-          { name: '火箭燃料', weight: 0.08, bg: 'bg-red', rarity: '史诗', icon: 'rocketfuel', coins: 180 },
-          { name: '微型反应炉', weight: 0.058, bg: 'bg-red', rarity: '史诗', icon: 'reactor', coins: 245 },
-          { name: '非洲之心', weight: 0.012, bg: 'bg-red', rarity: '传说', icon: 'heartgem', coins: 1314 }
-        ]
-      },
-      {
-        name: '潮汐监狱',
-        cost: 123,
-        loot: [
-          { name: '摄像头', weight: 32, bg: 'bg-blue', rarity: '侦察', icon: 'camera', coins: 10 },
-          { name: '一桶油漆', weight: 28, bg: 'bg-blue', rarity: '侦察', icon: 'paint', coins: 16 },
-          { name: '海盗弯刀', weight: 10.3, bg: 'bg-purple', rarity: '稀有', icon: 'cutlass', coins: 24 },
-          { name: '牛角', weight: 9.7, bg: 'bg-purple', rarity: '稀有', icon: 'horn', coins: 21 },
-          { name: '海盗金币', weight: 7, bg: 'bg-gold', rarity: '金色', icon: 'coin', coins: 35 },
-          { name: '座钟', weight: 5, bg: 'bg-gold', rarity: '金色', icon: 'clock', coins: 50 },
-          { name: '渡鸦脑机数据', weight: 1.5, bg: 'bg-red', rarity: '史诗', icon: 'ravenchip', coins: 75 },
-          { name: '香槟', weight: 1.8, bg: 'bg-red', rarity: '史诗', icon: 'champagne', coins: 79 },
-          { name: '金条', weight: 1.2, bg: 'bg-red', rarity: '史诗', icon: 'goldbar', coins: 78 },
-          { name: '黄金瞪羚', weight: 1, bg: 'bg-red', rarity: '史诗', icon: 'gazelle', coins: 98 },
-          { name: '半身像', weight: 0.55, bg: 'bg-red', rarity: '史诗', icon: 'bust', coins: 128 },
-          { name: '留音机', weight: 0.55, bg: 'bg-red', rarity: '史诗', icon: 'gramophone', coins: 129 },
-          { name: '步战车模型', weight: 0.55, bg: 'bg-red', rarity: '史诗', icon: 'ifv', coins: 130 },
-          { name: '浮力补偿设备', weight: 0.32, bg: 'bg-red', rarity: '史诗', icon: 'buoyancy', coins: 189 },
-          { name: '扫地机器人', weight: 0.12, bg: 'bg-red', rarity: '史诗', icon: 'robot', coins: 195 },
-          { name: '微型反应炉', weight: 0.11, bg: 'bg-red', rarity: '史诗', icon: 'reactor', coins: 245 },
-          { name: '雷明顿打字机', weight: 0.15, bg: 'bg-red', rarity: '史诗', icon: 'typewriter', coins: 200 },
-          { name: '装甲车电池', weight: 0.05, bg: 'bg-red', rarity: '史诗', icon: 'apcbattery', coins: 666 },
-          { name: '复苏呼吸机', weight: 0.05, bg: 'bg-red', rarity: '史诗', icon: 'ventilator', coins: 999 },
-          { name: '非洲之心', weight: 0.02, bg: 'bg-red', rarity: '传说', icon: 'heartgem', coins: 1314 },
-          { name: '海洋之泪', weight: 0.03, bg: 'bg-red', rarity: '传说', icon: 'oceantear', coins: 1999 }
         ]
       }
     ];
@@ -330,14 +251,6 @@ const COIN_CAP = 5000;
         squarecoin: `<svg class="icon-svg" viewBox="0 0 100 100"><rect x="25" y="25" width="50" height="50" rx="10" class="s-light"></rect><rect x="40" y="40" width="20" height="20" rx="4" class="s-mid"></rect><path d="M25 50 H75" class="stroke" opacity="0.4"></path></svg>`,
         crown: `<svg class="icon-svg" viewBox="0 0 100 100"><path d="M24 68 L32 35 L49 52 L66 31 L76 68 Z" class="s-light"></path><rect x="26" y="68" width="48" height="10" rx="3" class="s-mid"></rect></svg>`,
         board: `<svg class="icon-svg" viewBox="0 0 100 100"><rect x="26" y="26" width="48" height="48" rx="4" class="s-light"></rect><path d="M42 26 V74 M58 26 V74 M26 42 H74 M26 58 H74" class="stroke"></path></svg>`,
-        satdish: `<svg class="icon-svg" viewBox="0 0 100 100"><path d="M30 66 C30 44, 48 28, 70 28 C71 47, 58 66, 36 70 Z" class="s-light"></path><path d="M44 58 C52 50, 60 46, 69 44" class="stroke"></path><path d="M38 70 L50 58" class="stroke"></path><circle cx="54" cy="54" r="4" class="s-mid"></circle></svg>`,
-        rocketfuel: `<svg class="icon-svg" viewBox="0 0 100 100"><rect x="40" y="18" width="20" height="42" rx="8" class="s-light"></rect><path d="M50 18 L60 28 H40 Z" class="s-mid"></path><path d="M40 48 H60" class="stroke"></path><path d="M44 60 L40 76 L50 70 L60 76 L56 60 Z" class="s-dark"></path></svg>`,
-        apcbattery: `<svg class="icon-svg" viewBox="0 0 100 100"><rect x="26" y="30" width="48" height="40" rx="8" class="s-light"></rect><rect x="38" y="24" width="8" height="8" rx="2" class="s-mid"></rect><rect x="54" y="24" width="8" height="8" rx="2" class="s-mid"></rect><path d="M39 50 H61" class="stroke"></path><path d="M50 40 V60" class="stroke"></path></svg>`,
-        ravenchip: `<svg class="icon-svg" viewBox="0 0 100 100"><rect x="28" y="28" width="44" height="44" rx="8" class="s-light"></rect><rect x="40" y="40" width="20" height="20" rx="4" class="s-mid"></rect><path d="M20 38 H28 M20 50 H28 M20 62 H28 M72 38 H80 M72 50 H80 M72 62 H80 M38 20 V28 M50 20 V28 M62 20 V28 M38 72 V80 M50 72 V80 M62 72 V80" class="stroke"></path></svg>`,
-        buoyancy: `<svg class="icon-svg" viewBox="0 0 100 100"><path d="M32 34 H68 V58 C68 68, 60 76, 50 76 C40 76, 32 68, 32 58 Z" class="s-light"></path><path d="M38 34 V24 H62 V34" class="stroke"></path><circle cx="50" cy="55" r="10" class="s-mid"></circle><path d="M46 55 H54" class="stroke"></path></svg>`,
-        typewriter: `<svg class="icon-svg" viewBox="0 0 100 100"><rect x="24" y="46" width="52" height="24" rx="6" class="s-dark"></rect><rect x="32" y="26" width="36" height="16" rx="4" class="s-light"></rect><circle cx="36" cy="58" r="4" class="s-light"></circle><circle cx="48" cy="58" r="4" class="s-light"></circle><circle cx="60" cy="58" r="4" class="s-light"></circle><path d="M34 74 H66" class="stroke"></path></svg>`,
-        ventilator: `<svg class="icon-svg" viewBox="0 0 100 100"><rect x="28" y="24" width="44" height="36" rx="8" class="s-light"></rect><path d="M38 42 C42 35, 48 49, 52 42 C56 35, 60 47, 64 40" class="stroke"></path><rect x="42" y="60" width="16" height="10" rx="3" class="s-mid"></rect><path d="M50 70 V80" class="stroke"></path></svg>`,
-        oceantear: `<svg class="icon-svg" viewBox="0 0 100 100"><path d="M50 18 C63 34, 72 46, 72 58 C72 71, 62 80, 50 80 C38 80, 28 71, 28 58 C28 46, 37 34, 50 18 Z" class="s-light"></path><circle cx="46" cy="50" r="8" class="s-mid" opacity="0.7"></circle></svg>`,
         heartgem: `<svg class="icon-svg" viewBox="0 0 100 100"><path d="M50 79 L24 48 C17 39, 20 24, 34 22 C42 21, 47 25, 50 31 C53 25, 58 21, 66 22 C80 24, 83 39, 76 48 Z" class="s-light"></path><circle cx="50" cy="51" r="9" class="s-mid"></circle></svg>`
       };
       return icons[type] || `<div style="font-size:28px;color:#fff">?</div>`;
@@ -345,7 +258,7 @@ const COIN_CAP = 5000;
 
     function renderCodex() {
       codexGrid.innerHTML = '';
-      RED_ITEMS.forEach((item) => {
+      sortedRedItems.forEach((item) => {
         const unlocked = discoveredRedItems.has(item.name);
         const div = document.createElement('article');
         div.className = `codex-item${unlocked ? '' : ' locked'}`;
