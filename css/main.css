@@ -591,3 +591,157 @@
       .icon-wrap { width: 76%; }
       .codex-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
+
+/* ===== 地图按钮主题视觉升级 ===== */
+
+.map-button .shell {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.map-button .core {
+  justify-content: flex-end;
+  padding: 84px 10px 28px;
+  overflow: hidden;
+}
+
+.map-button .core::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  height: 46%;
+  border-radius: 12px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 76% auto;
+  opacity: 0.95;
+  filter: drop-shadow(0 8px 12px rgba(0,0,0,0.22));
+  pointer-events: none;
+}
+
+.button-title {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 44px;
+  writing-mode: horizontal-tb;
+  text-orientation: mixed;
+  letter-spacing: 0.12em;
+  font-size: clamp(14px, 1.9vw, 18px);
+  line-height: 1.25;
+}
+
+.map-cost {
+  bottom: 12px;
+}
+
+/* 零号大坝：浅灰 + 大坝 */
+#drawButton[aria-label*="零号大坝"] .shell {
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255,255,255,0.16), transparent 28%),
+    linear-gradient(180deg, #d5d8de 0%, #a7adb6 48%, #7f8791 100%);
+}
+
+#drawButton[aria-label*="零号大坝"] .core::before {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'><rect x='10' y='12' width='80' height='30' rx='6' fill='rgba(52,66,84,0.9)'/><rect x='16' y='18' width='10' height='18' rx='2' fill='rgba(232,240,248,0.85)'/><rect x='31' y='18' width='10' height='18' rx='2' fill='rgba(232,240,248,0.85)'/><rect x='46' y='18' width='10' height='18' rx='2' fill='rgba(232,240,248,0.85)'/><rect x='61' y='18' width='10' height='18' rx='2' fill='rgba(232,240,248,0.85)'/><rect x='76' y='18' width='8' height='18' rx='2' fill='rgba(232,240,248,0.85)'/><path d='M14 42 C26 48, 40 50, 50 50 C62 50, 75 47, 86 42' stroke='rgba(201,230,255,0.95)' stroke-width='4' fill='none' stroke-linecap='round'/></svg>");
+}
+
+/* 长弓溪谷：黄土 + 峡谷 */
+#drawButton[aria-label*="长弓溪谷"] .shell {
+  background:
+    radial-gradient(circle at 24% 22%, rgba(255,232,185,0.18), transparent 26%),
+    linear-gradient(180deg, #d9b374 0%, #b17b47 52%, #7f5132 100%);
+}
+
+#drawButton[aria-label*="长弓溪谷"] .core::before {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'><path d='M12 46 L28 18 L42 36 L55 16 L72 42 L88 22' stroke='rgba(72,45,28,0.92)' stroke-width='7' fill='none' stroke-linecap='round' stroke-linejoin='round'/><path d='M24 46 C34 36, 44 33, 54 34 C63 35, 73 39, 84 46' stroke='rgba(255,236,202,0.9)' stroke-width='4' fill='none' stroke-linecap='round'/></svg>");
+}
+
+/* 巴克十：灰蓝 + 科技塔 */
+#drawButton[aria-label*="巴克十"] .shell {
+  background:
+    radial-gradient(circle at 30% 18%, rgba(226,243,255,0.14), transparent 24%),
+    linear-gradient(180deg, #bcc9d9 0%, #7f96ad 54%, #53677e 100%);
+}
+
+#drawButton[aria-label*="巴克十"] .core::before {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'><path d='M50 10 L64 20 L58 46 L42 46 L36 20 Z' fill='rgba(31,50,70,0.94)'/><path d='M46 18 H54 M44 24 H56 M43 30 H57 M42 36 H58' stroke='rgba(222,244,255,0.9)' stroke-width='2.6' stroke-linecap='round'/><path d='M28 46 H72' stroke='rgba(222,244,255,0.9)' stroke-width='4' stroke-linecap='round'/><circle cx='50' cy='14' r='4' fill='rgba(222,244,255,0.9)'/></svg>");
+}
+
+/* 黑夜大坝：深蓝 + 大坝 + 上半部分星点 */
+#drawButton[aria-label*="黑夜大坝"] .shell {
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255,255,255,0.24) 0 1px, transparent 2px),
+    radial-gradient(circle at 32% 18%, rgba(255,255,255,0.20) 0 1px, transparent 2px),
+    radial-gradient(circle at 48% 10%, rgba(255,255,255,0.22) 0 1px, transparent 2px),
+    radial-gradient(circle at 62% 16%, rgba(255,255,255,0.18) 0 1px, transparent 2px),
+    radial-gradient(circle at 78% 12%, rgba(255,255,255,0.24) 0 1px, transparent 2px),
+    radial-gradient(circle at 24% 26%, rgba(255,255,255,0.16) 0 1px, transparent 2px),
+    linear-gradient(180deg, #18335d 0%, #0e1f3c 48%, #091222 100%);
+  background-repeat: no-repeat;
+}
+
+#drawButton[aria-label*="黑夜大坝"] .core::before {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'><rect x='10' y='13' width='80' height='28' rx='6' fill='rgba(214,231,255,0.18)' stroke='rgba(225,240,255,0.72)' stroke-width='2'/><rect x='18' y='18' width='9' height='16' rx='2' fill='rgba(225,240,255,0.8)'/><rect x='33' y='18' width='9' height='16' rx='2' fill='rgba(225,240,255,0.8)'/><rect x='48' y='18' width='9' height='16' rx='2' fill='rgba(225,240,255,0.8)'/><rect x='63' y='18' width='9' height='16' rx='2' fill='rgba(225,240,255,0.8)'/><rect x='77' y='18' width='6' height='16' rx='2' fill='rgba(225,240,255,0.8)'/><path d='M14 44 C24 49, 36 51, 50 51 C63 51, 76 48, 86 44' stroke='rgba(160,214,255,0.95)' stroke-width='4' fill='none' stroke-linecap='round'/></svg>");
+}
+
+/* 航天基地：橙色 + 火箭 */
+#drawButton[aria-label*="航天基地"] .shell {
+  background:
+    radial-gradient(circle at 26% 18%, rgba(255,244,214,0.18), transparent 24%),
+    linear-gradient(180deg, #f39a42 0%, #d96524 52%, #983b14 100%);
+}
+
+#drawButton[aria-label*="航天基地"] .core::before {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'><path d='M50 10 C58 18, 60 28, 60 42 H40 C40 28, 42 18, 50 10 Z' fill='rgba(255,242,223,0.92)'/><circle cx='50' cy='26' r='5' fill='rgba(233,121,50,0.95)'/><path d='M40 34 L30 42 L40 44 Z M60 34 L70 42 L60 44 Z' fill='rgba(77,30,15,0.88)'/><path d='M44 42 L40 54 L50 48 L60 54 L56 42 Z' fill='rgba(255,174,77,0.95)'/></svg>");
+}
+
+/* 潮汐监狱：红色 + 监狱 */
+#drawButton[aria-label*="潮汐监狱"] .shell {
+  background:
+    radial-gradient(circle at 24% 18%, rgba(255,228,228,0.12), transparent 24%),
+    linear-gradient(180deg, #b74747 0%, #7e2323 54%, #4a1111 100%);
+}
+
+#drawButton[aria-label*="潮汐监狱"] .core::before {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'><rect x='18' y='16' width='64' height='30' rx='5' fill='rgba(255,234,234,0.2)' stroke='rgba(255,235,235,0.82)' stroke-width='2'/><path d='M30 18 V44 M40 18 V44 M50 18 V44 M60 18 V44 M70 18 V44' stroke='rgba(255,235,235,0.9)' stroke-width='3' stroke-linecap='round'/><path d='M18 46 H82' stroke='rgba(255,235,235,0.92)' stroke-width='4' stroke-linecap='round'/></svg>");
+}
+
+@media (max-width: 780px) {
+  .map-button .core {
+    padding-top: 74px;
+  }
+
+  .button-title {
+    bottom: 42px;
+    font-size: 14px;
+  }
+
+  .map-button .core::before {
+    background-size: 78% auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .map-button .core {
+    padding-top: 64px;
+    padding-bottom: 26px;
+  }
+
+  .button-title {
+    bottom: 40px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+
+  .map-button .core::before {
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    height: 44%;
+    background-size: 82% auto;
+  }
+}
