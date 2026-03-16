@@ -32,9 +32,6 @@ const COIN_CAP = 5000;
 
     const discoveredRedItems = new Set();
 
-// 图鉴按价格排序（只影响显示）
-const sortedRedItems = [...RED_ITEMS].sort((a,b)=>a.coins-b.coins);
-
     const maps = [
       {
         name: '零号大坝',
@@ -83,7 +80,7 @@ const sortedRedItems = [...RED_ITEMS].sort((a,b)=>a.coins-b.coins);
       },
       {
         name: '巴克十',
-        cost: 42,
+        cost: 43,
         loot: [
           { name: '石工锤', weight: 30, bg: 'bg-green', rarity: '标准', icon: 'hammer', coins: 3 },
           { name: '角磨机', weight: 30, bg: 'bg-green', rarity: '标准', icon: 'grinder', coins: 4 },
@@ -107,7 +104,7 @@ const sortedRedItems = [...RED_ITEMS].sort((a,b)=>a.coins-b.coins);
       },
       {
         name: '黑夜大坝',
-        cost: 44,
+        cost: 48,
         loot: [
           { name: '石工锤', weight: 25, bg: 'bg-green', rarity: '标准', icon: 'hammer', coins: 3 },
           { name: '角磨机', weight: 25, bg: 'bg-green', rarity: '标准', icon: 'grinder', coins: 4 },
@@ -153,7 +150,7 @@ const sortedRedItems = [...RED_ITEMS].sort((a,b)=>a.coins-b.coins);
       },
       {
         name: '潮汐监狱',
-        cost: 118,
+        cost: 123,
         loot: [
           { name: '摄像头', weight: 32, bg: 'bg-blue', rarity: '侦察', icon: 'camera', coins: 10 },
           { name: '一桶油漆', weight: 28, bg: 'bg-blue', rarity: '侦察', icon: 'paint', coins: 16 },
@@ -348,7 +345,7 @@ const sortedRedItems = [...RED_ITEMS].sort((a,b)=>a.coins-b.coins);
 
     function renderCodex() {
       codexGrid.innerHTML = '';
-      sortedRedItems.forEach((item) => {
+      RED_ITEMS.forEach((item) => {
         const unlocked = discoveredRedItems.has(item.name);
         const div = document.createElement('article');
         div.className = `codex-item${unlocked ? '' : ' locked'}`;
