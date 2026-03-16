@@ -32,6 +32,9 @@ const COIN_CAP = 5000;
 
     const discoveredRedItems = new Set();
 
+// 图鉴按价格排序（仅影响显示，不影响掉落）
+const sortedRedItems = [...RED_ITEMS].sort((a, b) => a.coins - b.coins);
+
     const maps = [
       {
         name: '零号大坝',
@@ -80,7 +83,7 @@ const COIN_CAP = 5000;
       },
       {
         name: '巴克十',
-        cost: 43,
+        cost: 42,
         loot: [
           { name: '石工锤', weight: 30, bg: 'bg-green', rarity: '标准', icon: 'hammer', coins: 3 },
           { name: '角磨机', weight: 30, bg: 'bg-green', rarity: '标准', icon: 'grinder', coins: 4 },
@@ -104,7 +107,7 @@ const COIN_CAP = 5000;
       },
       {
         name: '黑夜大坝',
-        cost: 48,
+        cost: 44,
         loot: [
           { name: '石工锤', weight: 25, bg: 'bg-green', rarity: '标准', icon: 'hammer', coins: 3 },
           { name: '角磨机', weight: 25, bg: 'bg-green', rarity: '标准', icon: 'grinder', coins: 4 },
@@ -150,7 +153,7 @@ const COIN_CAP = 5000;
       },
       {
         name: '潮汐监狱',
-        cost: 123,
+        cost: 118,
         loot: [
           { name: '摄像头', weight: 32, bg: 'bg-blue', rarity: '侦察', icon: 'camera', coins: 10 },
           { name: '一桶油漆', weight: 28, bg: 'bg-blue', rarity: '侦察', icon: 'paint', coins: 16 },
@@ -345,7 +348,7 @@ const COIN_CAP = 5000;
 
     function renderCodex() {
       codexGrid.innerHTML = '';
-      RED_ITEMS.forEach((item) => {
+      sortedRedItems.forEach((item) => {
         const unlocked = discoveredRedItems.has(item.name);
         const div = document.createElement('article');
         div.className = `codex-item${unlocked ? '' : ' locked'}`;
