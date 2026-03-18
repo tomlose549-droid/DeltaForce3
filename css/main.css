@@ -746,3 +746,47 @@
     background-size: 82% auto;
   }
 }
+
+
+/* ===== 零号大坝特殊事件：破壁卡牌 ===== */
+.rupture-card {
+  margin-left: clamp(18px, 4vw, 42px);
+}
+
+.rupture-back {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255,184,120,0.14), transparent 28%),
+    linear-gradient(145deg, #000000, #131313 45%, #070707 100%);
+}
+
+.rupture-back::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255,158,68,0.18), transparent 18%),
+    conic-gradient(from 0deg at 50% 50%,
+      transparent 0deg 18deg,
+      rgba(255,196,132,0.11) 18deg 24deg,
+      transparent 24deg 60deg,
+      rgba(255,196,132,0.10) 60deg 66deg,
+      transparent 66deg 120deg,
+      rgba(255,196,132,0.09) 120deg 126deg,
+      transparent 126deg 180deg,
+      rgba(255,196,132,0.11) 180deg 186deg,
+      transparent 186deg 240deg,
+      rgba(255,196,132,0.10) 240deg 246deg,
+      transparent 246deg 300deg,
+      rgba(255,196,132,0.09) 300deg 306deg,
+      transparent 306deg 360deg);
+  mix-blend-mode: screen;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+@media (max-width: 480px) {
+  .rupture-card {
+    margin-left: 12px;
+  }
+}
