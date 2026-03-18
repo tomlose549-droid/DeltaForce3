@@ -7,10 +7,11 @@ const COIN_CAP = 5000;
 
     const RED_ITEMS = [
       { name: '劳力士', icon: 'rolex', coins: 70 },
+      { name: '渡鸦脑机数据', icon: 'ravenchip', coins: 75 },
       { name: '金条', icon: 'goldbar', coins: 78 },
       { name: '香槟', icon: 'champagne', coins: 79 },
-      { name: '渡鸦脑机数据', icon: 'ravenchip', coins: 75 },
       { name: '黄金瞪羚', icon: 'gazelle', coins: 98 },
+      { name: '高能瓦斯罐', icon: 'gascan', coins: 99 },
       { name: '卫星锅', icon: 'satdish', coins: 100 },
       { name: '天圆地方', icon: 'squarecoin', coins: 105 },
       { name: '半身像', icon: 'bust', coins: 128 },
@@ -21,6 +22,7 @@ const COIN_CAP = 5000;
       { name: '浮力补偿设备', icon: 'buoyancy', coins: 189 },
       { name: '扫地机器人', icon: 'robot', coins: 195 },
       { name: '雷明顿打字机', icon: 'typewriter', coins: 200 },
+      { name: '名画', icon: 'painting', coins: 210 },
       { name: '微型反应炉', icon: 'reactor', coins: 245 },
       { name: '万金泪冠', icon: 'crown', coins: 293 },
       { name: '纵横棋盘', icon: 'board', coins: 299 },
@@ -50,9 +52,10 @@ const sortedRedItems = [...RED_ITEMS].sort((a, b) => a.coins - b.coins);
           { name: '牛角', weight: 3.5, bg: 'bg-purple', rarity: '稀有', icon: 'horn', coins: 21 },
           { name: '海盗金币', weight: 1.8, bg: 'bg-gold', rarity: '金色', icon: 'coin', coins: 35 },
           { name: '座钟', weight: 0.7, bg: 'bg-gold', rarity: '金色', icon: 'clock', coins: 50 },
-          { name: '劳力士', weight: 0.5, bg: 'bg-red', rarity: '史诗', icon: 'rolex', coins: 70 },
           { name: '金条', weight: 0.55, bg: 'bg-red', rarity: '史诗', icon: 'goldbar', coins: 78 },
-          { name: '黄金瞪羚', weight: 0.3, bg: 'bg-red', rarity: '史诗', icon: 'gazelle', coins: 98 },
+          { name: '劳力士', weight: 0.50, bg: 'bg-red', rarity: '史诗', icon: 'rolex', coins: 70 },
+          { name: '黄金瞪羚', weight: 0.14, bg: 'bg-red', rarity: '史诗', icon: 'gazelle', coins: 98 },
+          { name: '高能瓦斯罐', weight: 0.16, bg: 'bg-red', rarity: '史诗', icon: 'gascan', coins: 99 },
           { name: '军用炮弹', weight: 0.12, bg: 'bg-red', rarity: '史诗', icon: 'shell', coins: 142 },
           { name: '微型反应炉', weight: 0.026, bg: 'bg-red', rarity: '史诗', icon: 'reactor', coins: 245 },
           { name: '非洲之心', weight: 0.004, bg: 'bg-red', rarity: '传说', icon: 'heartgem', coins: 1314 }
@@ -178,6 +181,23 @@ const sortedRedItems = [...RED_ITEMS].sort((a, b) => a.coins - b.coins);
           { name: '海洋之泪', weight: 0.03, bg: 'bg-red', rarity: '传说', icon: 'oceantear', coins: 1999 }
         ]
       }
+    ];
+
+    const ZERO_DAM_EVENT_CHANCE = 0.07;
+    const ruptureLoot = [
+      { name: '石工锤', weight: 25, bg: 'bg-green', rarity: '标准', icon: 'hammer', coins: 3 },
+      { name: '石碑', weight: 35, bg: 'bg-green', rarity: '标准', icon: 'stele', coins: 5 },
+      { name: '一桶油漆', weight: 15, bg: 'bg-blue', rarity: '侦察', icon: 'paint', coins: 16 },
+      { name: '海盗弯刀', weight: 5, bg: 'bg-purple', rarity: '稀有', icon: 'cutlass', coins: 24 },
+      { name: '牛角', weight: 5, bg: 'bg-purple', rarity: '稀有', icon: 'horn', coins: 21 },
+      { name: '海盗金币', weight: 5, bg: 'bg-gold', rarity: '金色', icon: 'coin', coins: 35 },
+      { name: '座钟', weight: 4, bg: 'bg-gold', rarity: '金色', icon: 'clock', coins: 50 },
+      { name: '金条', weight: 3.5, bg: 'bg-red', rarity: '史诗', icon: 'goldbar', coins: 78 },
+      { name: '劳力士', weight: 1.35, bg: 'bg-red', rarity: '史诗', icon: 'rolex', coins: 70 },
+      { name: '黄金瞪羚', weight: 0.55, bg: 'bg-red', rarity: '史诗', icon: 'gazelle', coins: 98 },
+      { name: '半身像', weight: 0.25, bg: 'bg-red', rarity: '史诗', icon: 'bust', coins: 128 },
+      { name: '留音机', weight: 0.25, bg: 'bg-red', rarity: '史诗', icon: 'gramophone', coins: 129 },
+      { name: '名画', weight: 0.1, bg: 'bg-red', rarity: '史诗', icon: 'painting', coins: 210 }
     ];
 
     const cardsArea = document.getElementById('cardsArea');
@@ -308,6 +328,12 @@ const sortedRedItems = [...RED_ITEMS].sort((a, b) => a.coins - b.coins);
       tone({ type: 'triangle', frequency: 520, start: 0.04, duration: 0.16, gain: 0.012, endFrequency: 260 });
     }
 
+    function playEventExplosionSound() {
+      noiseBurst({ duration: 0.32, gain: 0.06 });
+      tone({ type: 'sawtooth', frequency: 180, duration: 0.22, gain: 0.025, endFrequency: 70 });
+      tone({ type: 'triangle', frequency: 760, start: 0.02, duration: 0.18, gain: 0.018, endFrequency: 220 });
+    }
+
     function iconMarkup(type) {
       const icons = {
         candle: `<svg class="icon-svg" viewBox="0 0 100 100"><rect x="23" y="20" width="54" height="62" rx="7" class="s-dark" opacity="0.12"></rect><rect x="28" y="26" width="44" height="52" rx="6" class="s-light"></rect><rect x="34" y="36" width="32" height="28" rx="4" class="s-mid"></rect><rect x="41" y="46" width="6" height="18" class="s-light"></rect><rect x="53" y="42" width="6" height="22" class="s-light"></rect><path d="M44 33 C42 27, 49 24, 50 18 C55 24, 58 28, 56 33 C54 38, 46 38, 44 33 Z" class="s-dark"></path></svg>`,
@@ -341,6 +367,9 @@ const sortedRedItems = [...RED_ITEMS].sort((a, b) => a.coins - b.coins);
         typewriter: `<svg class="icon-svg" viewBox="0 0 100 100"><rect x="24" y="46" width="52" height="24" rx="6" class="s-dark"></rect><rect x="32" y="26" width="36" height="16" rx="4" class="s-light"></rect><circle cx="36" cy="58" r="4" class="s-light"></circle><circle cx="48" cy="58" r="4" class="s-light"></circle><circle cx="60" cy="58" r="4" class="s-light"></circle><path d="M34 74 H66" class="stroke"></path></svg>`,
         ventilator: `<svg class="icon-svg" viewBox="0 0 100 100"><rect x="28" y="24" width="44" height="36" rx="8" class="s-light"></rect><path d="M38 42 C42 35, 48 49, 52 42 C56 35, 60 47, 64 40" class="stroke"></path><rect x="42" y="60" width="16" height="10" rx="3" class="s-mid"></rect><path d="M50 70 V80" class="stroke"></path></svg>`,
         oceantear: `<svg class="icon-svg" viewBox="0 0 100 100"><path d="M50 18 C63 34, 72 46, 72 58 C72 71, 62 80, 50 80 C38 80, 28 71, 28 58 C28 46, 37 34, 50 18 Z" class="s-light"></path><circle cx="46" cy="50" r="8" class="s-mid" opacity="0.7"></circle></svg>`,
+        gascan: `<svg class="icon-svg" viewBox="0 0 100 100"><rect x="30" y="26" width="40" height="48" rx="7" class="s-light"></rect><rect x="52" y="18" width="10" height="10" rx="2" class="s-mid"></rect><path d="M41 38 H57 M49 30 V46" class="stroke"></path><path d="M36 58 C42 52, 58 52, 64 58" class="stroke"></path></svg>`,
+        painting: `<svg class="icon-svg" viewBox="0 0 100 100"><rect x="24" y="24" width="52" height="44" rx="4" class="s-dark"></rect><rect x="30" y="30" width="40" height="32" rx="3" class="s-light"></rect><path d="M34 56 L46 44 L54 50 L66 38" class="stroke"></path><circle cx="42" cy="40" r="4" class="s-mid"></circle></svg>`,
+        stele: `<svg class="icon-svg" viewBox="0 0 100 100"><path d="M36 22 H64 V72 H36 Z" class="s-light"></path><path d="M40 18 C44 12, 56 12, 60 18" class="stroke"></path><path d="M44 38 H56 M44 48 H56 M44 58 H54" class="stroke"></path></svg>`,
         heartgem: `<svg class="icon-svg" viewBox="0 0 100 100"><path d="M50 79 L24 48 C17 39, 20 24, 34 22 C42 21, 47 25, 50 31 C53 25, 58 21, 66 22 C80 24, 83 39, 76 48 Z" class="s-light"></path><circle cx="50" cy="51" r="9" class="s-mid"></circle></svg>`
       };
       return icons[type] || `<div style="font-size:28px;color:#fff">?</div>`;
@@ -369,9 +398,9 @@ const sortedRedItems = [...RED_ITEMS].sort((a, b) => a.coins - b.coins);
       });
     }
 
-    function createCard(item) {
+    function createCard(item, options = {}) {
       const card = document.createElement('article');
-      card.className = 'game-card';
+      card.className = `game-card${options.isRupture ? ' rupture-card' : ''}`;
       card.dataset.state = 'back';
       card.dataset.counted = 'false';
       card.setAttribute('role', 'button');
@@ -380,7 +409,7 @@ const sortedRedItems = [...RED_ITEMS].sort((a, b) => a.coins - b.coins);
 
       card.innerHTML = `
         <div class="card-inner">
-          <div class="card-face card-back tactical-frame"></div>
+          <div class="card-face card-back tactical-frame${options.isRupture ? ' rupture-back' : ''}"></div>
           <div class="card-face card-front tactical-frame ${item.bg}" lang="zh-CN">
             <div class="card-topline"><span>LOOT</span><span>${item.rarity}</span></div>
             <div class="icon-wrap">${iconMarkup(item.icon)}</div>
@@ -445,6 +474,13 @@ const sortedRedItems = [...RED_ITEMS].sort((a, b) => a.coins - b.coins);
       cardsArea.innerHTML = '';
       const picks = [pickLoot(map.loot), pickLoot(map.loot), pickLoot(map.loot)];
       picks.forEach((item) => cardsArea.appendChild(createCard(item)));
+
+      if (map.name === '零号大坝' && Math.random() < ZERO_DAM_EVENT_CHANCE) {
+        const rupturePick = pickLoot(ruptureLoot);
+        cardsArea.appendChild(createCard(rupturePick, { isRupture: true }));
+        setTimeout(playEventExplosionSound, 120);
+      }
+
       cardsArea.classList.remove('hidden');
 
       if (picks.some((item) => item.bg === 'bg-gold')) {
